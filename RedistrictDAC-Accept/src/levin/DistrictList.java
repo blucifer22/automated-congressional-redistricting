@@ -35,10 +35,12 @@ public class DistrictList {
         }
     }
 
+    //JL_This constructor might initialize the intiial district (to be divided and conquered)
     public DistrictList(int k, String stateId, String doc_root) {
         this.k = k;
         this.districtList = new District[k];
         if (k == 1) {
+            //The first district is the whole, statewide district
             this.districtList[0] = new StateWideDistrict(stateId, doc_root);
         } else {
             System.err.println("Invalid use of this constructor. Statewide districts can only have one district.");
@@ -129,20 +131,26 @@ public class DistrictList {
         }
     }
 
+    //JL_main swapping function
     public void swap(Unit u, boolean validate) {
+        //Check that there are only two districts in the list for swap
         if (this.districtList.length == 2) {
+            //If the block is in the first district:
             if (this.districtList[0].contains(u)) {
                 Logger.log((String)"d0");
                 Logger.log((String)("Swapping: " + u.getId()));
                 Logger.log((String)this.districtList[0].getGeometry().toText());
                 Logger.log((String)"Unit geometry");
                 Logger.log((String)u.getGeometry().toText());
+                //Remove precinct from first list, add to second
                 this.districtList[0].remove(u);
                 this.districtList[1].add(u);
                 Logger.log((String)("Swapped " + u.getId()));
+                //Checks the newly updated districts to see if its a Multipolygon — if so, it'll log it.
                 if (Main.DEBUG && (this.districtList[0].getGeometry().toText().contains("MULTIPOLYGON") || this.districtList[1].getGeometry().toText().contains("MULTIPOLYGON"))) {
                     System.out.println("Swapped " + u.getId() + " and made districts non-contig");
                 }
+             // If the block is in the second district:
             } else if (this.districtList[1].contains(u)) {
                 Logger.log((String)"d1");
                 Logger.log((String)("Swapping " + u.getId()));
