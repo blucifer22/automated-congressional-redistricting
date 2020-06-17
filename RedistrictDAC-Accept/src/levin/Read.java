@@ -31,7 +31,12 @@ import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 
-
+/**
+ *The class implements functions to read one or many of the following files:
+ * 1.Shapefiles, 2. Population files
+ * It assumes the use of 2010 census block/census tract data, which explains
+ * the naming conventions for the instance variables.
+ */
 public class Read {
     private static String SHAPE_FILE;
     private static String POP_FILE;
@@ -44,7 +49,13 @@ public class Read {
     private static ArrayList<Unit> RAW_UNITS;
     private static boolean IS_BLOCK;
     private static int EDITED_UNITS;
-
+    /**
+     * Don't return anything; only update the instance variables based on input parameters (filenames + a boolean)
+     * @param  Strings:{doc_root, dataFilePath, shapeFile, popFil}
+     * @param  boolean: isBlock (if false, then is a census Tract)
+     * @return      None
+     * @see         None
+     */
     public Read(String doc_root, String dataFilePath, String shapeFile, String popFile, boolean isBlock) {
         DOC_ROOT = doc_root;
         SHAPE_FILE = String.valueOf(doc_root) + dataFilePath + shapeFile;
@@ -55,6 +66,16 @@ public class Read {
         RAW_UNITS = new ArrayList();
         IS_BLOCK = isBlock;
     }
+
+    /**
+     * A function when you want to start districting for a new state: 'this' (read) object had been already initialized,
+     * so we can access 'this' object's instance variables (filenames, boolean, other strings(naming conventions))
+     * for referencing raw data of the new state
+     * @param  Strings: stateID
+     * @return      a DistrictList object called stateWideDistricts
+     * @see  /...         DistrictList
+     *
+     */
 
     public DistrictList getDistrictList(String stateId) {
         DistrictList stateWideDistrictList = new DistrictList(1, stateId, DOC_ROOT);
