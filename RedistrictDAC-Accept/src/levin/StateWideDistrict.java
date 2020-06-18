@@ -18,6 +18,7 @@ import org.geotools.feature.FeatureIterator;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 
+//JL_Guessing this is a method for states with only one congressional district
 public class StateWideDistrict
 extends District {
     private int FIPS;
@@ -30,7 +31,7 @@ extends District {
         this.DOC_ROOT = doc_root;
         this.geometry = this.readStateGeometry();
     }
-
+    //JL_extended from District class, it essentially adds blocks to the district.
     public void add(Unit u) {
         this.members.add(u);
         this.population += u.getPopulation();

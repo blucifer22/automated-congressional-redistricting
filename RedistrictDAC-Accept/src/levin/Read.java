@@ -78,9 +78,11 @@ public class Read {
      */
 
     public DistrictList getDistrictList(String stateId) {
+        //Creates the intiail statewide district,to be divided/conquered
         DistrictList stateWideDistrictList = new DistrictList(1, stateId, DOC_ROOT);
         RAW_UNITS = this.read();
         Logger.log((String)"Finished reading now making state wide district");
+        //Adds each block (i.e. unit) to the statewidedistrict, updating its population too
         for (Unit u : RAW_UNITS) {
             ((StateWideDistrict)stateWideDistrictList.getDistrict(0)).add(u);
         }

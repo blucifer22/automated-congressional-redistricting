@@ -23,6 +23,7 @@ import levin.printout.ErrorLog;
 import levin.printout.Logger;
 import levin.printout.Messenger;
 
+//JL_Test commit
 
 public class Main {
     public static boolean DEBUG;
@@ -46,8 +47,12 @@ public class Main {
         ADDED_UNIT_ID = "13";
     }
 
+    //JL_Below are the arguments passed in to main:
+    //(time java -jar -Xmx80000m '../jars/dac.jar' "$STATE" "$K" '/home/data' 'true' "$UNIT" "$SWAP" 'true' "$MAX_FUNC" "$SITE") &> $LOGFILE
+    // I believe this runs every time, for each new state
     public static void main(String[] args) throws IOException {
         Messenger.log((String)("Processing with " + args.length + " args"));
+        //This just initializes some variables and file paths
         if (args.length > 3) {
             STATE = args[0];
             k = Integer.parseInt(args[1]);
@@ -91,10 +96,14 @@ public class Main {
             SITE = "point";
             Messenger.log((String)("STATE=" + STATE + ", k=" + k + " , DOC_ROOT=" + DOC_ROOT + " , DEBUG=" + DEBUG + " , IS_BLOCK = " + IS_BLOCK + " , SWAPS= " + SWAPS));
         }
+        //Checks that data files are there.
         Main.validateRequirements();
         Read r = new Read(DOC_ROOT, dataFilePath, shapeFilePath, popFilePath, IS_BLOCK);
+        //Initializes a statewide district (to be divided and conquered), with all the composing blocks + population data;.
         District stateWideDistrict = r.getDistrictList(STATE).getDistrict(0);
+        //Grab coordinates of four corners of bounding box
         defaultSearchPoints = Main.getDefaultSearchPoints(stateWideDistrict.getGeometry());
+        //Runs the main buik of the program— divide and conquer!
         DistrictList finalDistricts = Main.divideAndConquer(k, stateWideDistrict);
         Messenger.log((String)"-----------------FINAL DISTRICTS---------------------");
         double devPercentage = finalDistricts.getDeviationPercentage(stateWideDistrict.getDistrictPopulation() / k);
@@ -113,12 +122,15 @@ public class Main {
 
     private static DistrictList divideAndConquer(int numDistrictsLeft, District d) {
         Messenger.log((String)("Districts Left: " + numDistrictsLeft + " , totalPop= " + d.getDistrictPopulation() + ", idealPop= " + d.getDistrictPopulation() / numDistrictsLeft));
+        //JL_Base case
         if (numDistrictsLeft == 1) {
             return new DistrictList(d);
         }
+        //If two districts left, divide once and end.
         if (numDistrictsLeft == 2) {
             return Main.runWithSearchPoints(d, d.getDistrictPopulation() / 2, false);
         }
+        //
         if (numDistrictsLeft % 2 != 0) {
             DistrictList oddRecursionList = Main.runWithSearchPoints(d, d.getDistrictPopulation() / numDistrictsLeft, false);
             DistrictList left = Main.divideAndConquer(1, oddRecursionList.getDistrict(0));
@@ -180,6 +192,7 @@ public class Main {
         DistrictList bestDistricts = null;
         int index = 0;
         int bestIndex = 0;
+        //Still uses the corners of the statewide district bounding rectangle
         double[][] arrd = defaultSearchPoints;
         int n = arrd.length;
         int n2 = 0;
@@ -220,6 +233,7 @@ public class Main {
         return bestDistricts;
     }
 
+    //JL_Yikes will have to research kd trees
     private static DistrictList redistrict(District district, int idealPop, double[] searchPoint, boolean optimizeMax) {
         DistrictList districts = new DistrictList(2);
         KdTree<Unit> kd = Main.makeKdTree(district.getMembers());
@@ -364,6 +378,8 @@ public class Main {
         }
     }
 
+    //JL_Not interested in looking through the KD-tree implemention...
+    //But it's most likely used for nearest neighbor searches. Put x, y, coordinates in the kd-tree for easy lookup.
     private static KdTree<Unit> makeKdTree(ArrayList<Unit> units) {
         KdTree kd = new KdTree(2);
         for (Unit u : units) {
@@ -374,15 +390,18 @@ public class Main {
         return kd;
     }
 
+    //JL Grab the coords of the four corners of the bounding rectangle, and return them
     private static double[][] getDefaultSearchPoints(Geometry stateWideGeom) {
         double[][] result = new double[4][2];
         Coordinate[] coords = stateWideGeom.getEnvelope().getCoordinates();
         int i = 0;
+        //Grab each of the four corners and return them
         while (i < coords.length - 1) {
             Coordinate c = coords[i];
             if (SITE.equals("point")) {
                 result[i][0] = c.y;
                 result[i][1] = c.x;
+                //the Line feature is to-be-implemented, only consider point for now
             } else if (SITE.equals("line")) {
                 if (i == 1 || i == 3) {
                     result[i][0] = c.y;
@@ -398,7 +417,7 @@ public class Main {
         }
         return result;
     }
-
+    //JL_Checks that the data files are there, I guess
     private static boolean validateRequirements() {
         File stateShapeFile = new File(String.valueOf(DOC_ROOT) + "/tl_2010_" + CompactnessCalculator.getFIPSString((String)STATE) + "_state10/tl_2010_" + CompactnessCalculator.getFIPSString((String)STATE) + "_state10.shp");
         File actualDistrictsShapeFile = new File(String.valueOf(DOC_ROOT) + "/2012Congress/2012Congress.shp");
