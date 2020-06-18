@@ -130,17 +130,20 @@ public class Main {
         if (numDistrictsLeft == 2) {
             return Main.runWithSearchPoints(d, d.getDistrictPopulation() / 2, false);
         }
-        //
+        //If odd district, call runWithSearchPoints to divide up the current district. Then divide and conquer each of the two smaller districts
         if (numDistrictsLeft % 2 != 0) {
             DistrictList oddRecursionList = Main.runWithSearchPoints(d, d.getDistrictPopulation() / numDistrictsLeft, false);
             DistrictList left = Main.divideAndConquer(1, oddRecursionList.getDistrict(0));
             DistrictList right = Main.divideAndConquer(numDistrictsLeft - 1, oddRecursionList.getDistrict(1));
+            //Just a simple array concatenation
             return Main.merge(left.getDistrictList(), right.getDistrictList());
         }
+        //If even left, call runWithSearchPoints to divide curernt district. Then divide and conquer each of the two smaller districts
         if (numDistrictsLeft % 2 == 0) {
             DistrictList evenRecursionList = Main.runWithSearchPoints(d, d.getDistrictPopulation() / 2, false);
             DistrictList left = Main.divideAndConquer(numDistrictsLeft / 2, evenRecursionList.getDistrict(0));
             DistrictList right = Main.divideAndConquer(numDistrictsLeft / 2, evenRecursionList.getDistrict(1));
+            //Merge is just a simple array concatenation
             return Main.merge(left.getDistrictList(), right.getDistrictList());
         }
         ErrorLog.log((String)("Invalid value for numDistrictsLeft: " + numDistrictsLeft));
@@ -158,14 +161,19 @@ public class Main {
 
     private static double getScore(DistrictList districts, int idealPop) {
         double result = 0.0;
+        //If optimizing solely for population, simply get the raw population deviation (in # of people).
         if (MAX_FUNCTION.equals("pop")) {
             result = Math.abs(districts.getDistrict(0).getDistrictPopulation() - idealPop);
+            //If optmizing just for cmpactness, return the worst compactness out of the two districts...
+            //then subtract from 1 so that higher score is worse
         } else if (MAX_FUNCTION.equals("contig")) {
             double worstComp = Main.getWorstCompactness(districts);
             result = 1.0 - worstComp;
+            //If optimizing for both, get a averaged score of 1-worst compactness and the popualtion deviation (as a %).
         } else if (MAX_FUNCTION.equals("both")) {
             double compScore = 1.0 - Main.getWorstCompactness(districts);
             double popScore = 100.0 * (Math.abs((double)districts.getDistrict(0).getDistrictPopulation() * 1.0 - (double)idealPop * 1.0) / (double)idealPop * 1.0);
+            //If the population deviation (in %) is over 0.5%, penalize the score a ton (100,000) (which will make it impossible to get selected, basically)e
             if (popScore > 0.5) {
                 popScore += 100000.0;
             }
@@ -200,6 +208,7 @@ public class Main {
         while (n2 < n) {
             double[] searchPoint = arrd[n2];
             Logger.log((String)"Calling redistrict");
+            //Redistrict is the main voronoi, contiguity, and pop swapping function
             DistrictList districts = Main.redistrict(d, idealPop, searchPoint, maxOptimize);
             Logger.log((String)"return from redistrict");
             Messenger.log((String)("\tPop0:" + districts.getDistrict(0).getDistrictPopulation() + "Pop1:" + districts.getDistrict(1).getDistrictPopulation()));
@@ -227,6 +236,10 @@ public class Main {
         Logger.log((String)bestDistricts.getDistrict(0).getGeometry().toText());
         Messenger.log((String)("\tBest0:" + bestDistricts.getDistrict(0).getDistrictPopulation() + " \n\t Best1: " + bestDistricts.getDistrict(1).getDistrictPopulation()));
         Logger.log((String)("DIFF: " + (bestDistricts.getDistrict(0).getDistrictPopulation() - bestDistricts.getDistrict(1).getDistrictPopulation())));
+
+        //JL_If running on tracts, and optimizing for pop, and not already maxOptimize, and populatino deviation isn't 1 yet:
+        //THen turn on maxOptimize, which... runs the pop swapping until performance stalls or 1 pop dev achieved
+        // Normally, pop swap would only run one loop
         if (!IS_BLOCK && MAX_FUNCTION.equals("pop") && !maxOptimize && bestDistricts.getFirstDistrictDev(idealPop) > 1) {
             Messenger.log((String)"********turning on maxOptimize");
             bestDistricts = Main.runWithSearchPoints(d, idealPop, true);
@@ -299,10 +312,12 @@ public class Main {
                 //JL_ updates last pop dev
                 lastDeviation = districts.getFirstDistrictDev(idealPop);
                 Main.optimizePopulation(districts, idealPop);
+                //If optimizeMax is on, will continuously run until performance stalls, or we've reached a 1 pop dev.
                 if (!optimizeMax) break;
             }
             Logger.log((String)"end optimize loop");
         }
+        //JL_Get the final pop deviation, and return your new districts
         double devPercentage = districts.getDeviationPercentage(idealPop);
         Messenger.log((String)("\tDeviation: " + districts.getDeviation(idealPop) + " people = " + (double)Math.round(devPercentage * 1000.0) / 1000.0 + "%"));
         Logger.log((String)String.valueOf(districts.getDistrict(1).getSkippedUnits().size()));
@@ -321,6 +336,7 @@ public class Main {
         Unit bestSwap = null;
         ArrayList<Unit> swappablesD1 = Main.getSwappabe(districts.getDistrict(1), districts.getDistrict(0));
         ArrayList<Unit> swappablesD2 = Main.getSwappabe(districts.getDistrict(0), districts.getDistrict(1));
+        //JL_Runs until initial swap candidates are exhausted OR if a perfect division is reached
         while (swappablesD1.size() > 0 && swappablesD2.size() > 0) {
             int currentDev;
             Logger.log((String)("sizes: " + swappablesD1.size() + " && " + swappablesD2.size()));

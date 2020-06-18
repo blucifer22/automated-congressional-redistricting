@@ -150,6 +150,7 @@ public class DistrictList {
                 this.districtList[1].add(u);
                 Logger.log((String)("Swapped " + u.getId()));
                 //Checks the newly updated districts to see if its a Multipolygon — if so, it'll log it.
+                //JL_although I'm not sure why this is here...
                 if (Main.DEBUG && (this.districtList[0].getGeometry().toText().contains("MULTIPOLYGON") || this.districtList[1].getGeometry().toText().contains("MULTIPOLYGON"))) {
                     System.out.println("Swapped " + u.getId() + " and made districts non-contig");
                 }
@@ -178,6 +179,8 @@ public class DistrictList {
         return this.districtList;
     }
 
+    //JL_very simplified compactness metric (that does not require merging district shapes, I guess)
+    //Gets the average area, average perimeter for a district, and returns an equal average of these two metrics.
     public double getAverageSimpleCompactnessScore() {
         double areaSum = 0.0;
         double perimSum = 0.0;
