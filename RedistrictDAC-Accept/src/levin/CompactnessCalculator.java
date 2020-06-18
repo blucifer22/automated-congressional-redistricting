@@ -35,20 +35,26 @@ public class CompactnessCalculator {
     private SummaryStatistics statCongPolsbyPopper = new SummaryStatistics();
     private SummaryStatistics statCongModifiedSchwartzberg = new SummaryStatistics();
 
+    /**
+     * Calculates measures of compactness utilizing metrics outlined in Compactness.java
+     * @param docroot Path to DataFile
+     * @param districts The list of districts for which to calculate compactness
+     * @param stateId The ID of the state in question, as established by FIPS convention
+     */
     public CompactnessCalculator(String docroot, DistrictList districts, String stateId) {
-        dataFilePath = String.valueOf(docroot) + "/2012Congress/2012Congress.shp";
+        dataFilePath = String.valueOf(docroot) + "/2012Congress/2012Congress.shp"; // Grab the shapefile for the congressional districts in question
         this.district = districts;
-        this.FIPS = CompactnessCalculator.getFIPS(stateId);
-        this.statOurConvexHull = new SummaryStatistics();
+        this.FIPS = CompactnessCalculator.getFIPS(stateId); // Build the FIPS code
+        this.statOurConvexHull = new SummaryStatistics(); // Create some summary statistics holder objects
         this.statOurPolsbyPopper = new SummaryStatistics();
         this.statOurModifiedSchwartzberg = new SummaryStatistics();
-        District[] arrdistrict = districts.getDistrictList();
-        int n = arrdistrict.length;
+        District[] arrdistrict = districts.getDistrictList(); // Get the list of districts into an array
+        int n = arrdistrict.length; // WHY CAN'T THEY USE FOR LOOPS?????
         int n2 = 0;
         while (n2 < n) {
             District ourDistrict = arrdistrict[n2];
             Compactness congCompactness = new Compactness(ourDistrict);
-            this.statOurConvexHull.addValue(congCompactness.getConvexHullMeasure());
+            this.statOurConvexHull.addValue(congCompactness.getConvexHullMeasure()); // Calculate the three measures of compactness for the revised districting
             this.statOurPolsbyPopper.addValue(congCompactness.getPolsbyPopperMeasure());
             this.statOurModifiedSchwartzberg.addValue(congCompactness.getModifiedSchwartzberg());
             ++n2;
@@ -58,13 +64,21 @@ public class CompactnessCalculator {
         this.statCongPolsbyPopper = new SummaryStatistics();
         this.statCongModifiedSchwartzberg = new SummaryStatistics();
         for (District actualCongDistrict : congDistricts) {
-            Compactness congCompactness = new Compactness(actualCongDistrict);
+            Compactness congCompactness = new Compactness(actualCongDistrict); // Calculate the three measures of compactness for the original districts
             this.statCongConvexHull.addValue(congCompactness.getConvexHullMeasure());
             this.statCongPolsbyPopper.addValue(congCompactness.getPolsbyPopperMeasure());
             this.statCongModifiedSchwartzberg.addValue(congCompactness.getModifiedSchwartzberg());
         }
     }
 
+    /**
+     * File handling for compactness calculator.
+     * NOTE: Uses deprecated methods and thus should probably be reworked at some point
+     * Converts from shapefile to proprietary "District" format and returns a list of Districts for the state,
+     * tagged with appropriate metadata.
+     * @return A list of Districts for the state in question, tagged appropriately for interoperability with other
+     * specified methods.
+     */
     private ArrayList<District> read() {
         ArrayList<District> districtList = new ArrayList<District>();
         try {
@@ -99,6 +113,12 @@ public class CompactnessCalculator {
         return districtList;
     }
 
+    /**
+     * A simple helper method to convert between a state and its FIPS code. Can easily
+     * be refactored into a oneliner using Maps.
+     * @param state The state
+     * @return It's FIPS code as a String
+     */
     public static String getFIPSString(String state) {
         int FIPS = CompactnessCalculator.getFIPS(state);
         String result = String.valueOf(FIPS);
@@ -108,6 +128,11 @@ public class CompactnessCalculator {
         return result;
     }
 
+    /**
+     * This method really ought to be replaced with a Map. (or at least a switch statement)
+     * @param state The state in question
+     * @return The FIPS code
+     */
     public static int getFIPS(String state) {
         if (state.toLowerCase().equals("nh")) {
             return 33;
@@ -241,10 +266,18 @@ public class CompactnessCalculator {
         return 0;
     }
 
+    /**
+     * A helper method to calculate the average compactness score across several metrics.
+     * @return The average compactness score across the metrics
+     */
     public double getAverageScore() {
         return (this.statOurConvexHull.getMean() + this.statOurReock.getMean() + this.statOurPolsbyPopper.getMean() + this.statOurModifiedSchwartzberg.getMean()) / 4.0;
     }
 
+    /**
+     * Self-Explanatory
+     * @return String representation of the CompactnessCalculator.
+     */
     public String toString() {
         String result = "";
         result = String.valueOf(result) + "-------------------Compactness-------------------\n";
