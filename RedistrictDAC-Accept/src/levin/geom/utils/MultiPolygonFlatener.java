@@ -10,11 +10,13 @@ import levin.Main;
 import levin.Unit;
 import levin.printout.Logger;
 
-
+//JL_Checks for noncontiguity, and does a contiguity swap to remaintain contiguity
+//JL_Confused about the implementation, but I believe this should be it.
 public class MultiPolygonFlatener {
     private DistrictList districts;
     private boolean hasChanged;
 
+    //JL_If it detects noncontiguity via the string "MULTIPOLYGON", it calls .flatten()
     public MultiPolygonFlatener(DistrictList districts) {
         this.districts = districts;
         this.hasChanged = false;
@@ -37,6 +39,7 @@ public class MultiPolygonFlatener {
         }
     }
 
+    //JL_not sure? Uses something based off of finding bad pieces? Not sure what the bad pieces are tho
     private ArrayList<Geometry> findBadPieces(Geometry geom) {
         ArrayList<Geometry> badPieces = new ArrayList<Geometry>();
         int index = this.getMostCoordinatesIndex(geom);
@@ -53,6 +56,7 @@ public class MultiPolygonFlatener {
         return badPieces;
     }
 
+    //JL_apparently, this gets the geometry with the most number of points composing the polygon??? what?
     private int getMostCoordinatesIndex(Geometry geom) {
         int maxCoordinates = 0;
         int maxCoordIndex = 0;

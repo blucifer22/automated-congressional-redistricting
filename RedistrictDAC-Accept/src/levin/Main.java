@@ -265,29 +265,38 @@ public class Main {
             //If first district has reached population, add everyting else to the 2nd district
             districts.getDistrict(1).add(u);
         }
+        //JL_I guess this assigns all the districts skipedp by the voronoi approach
         districts.assignSkippedDistricts();
         Logger.log((String)"Voronoi Districts");
         Logger.log((String)districts.getDistrict(0).getGeometry().toText());
         Logger.log((String)districts.getDistrict(1).getGeometry().toText());
+        //If checking contiguity (which we always are)
         if (CONTIG) {
             Logger.log((String)"MultiPolygonFlatener process starting");
+            //JL_Feed it into the contiguity checker class
             MultiPolygonFlatener mpf = new MultiPolygonFlatener(districts);
             Logger.log((String)("made changes: " + mpf.hasChanged()));
+            //JL_If contiguity breaks, then get two new districts via contiguity swap method
             if (mpf.hasChanged()) {
                 districts = mpf.getNewDistrictList();
             }
             Logger.log((String)"Flattener Test: ");
             Logger.log((String)String.valueOf(districts.getDistrict(0).getGeometry().toText().contains("MULTIPOLYGON")));
+            //JL_Bug :O
             Logger.log((String)String.valueOf(districts.getDistrict(0).getGeometry().toText().contains("MULTIPOLYGON")));
             Logger.log((String)districts.getDistrict(0).getGeometry().toText());
             Logger.log((String)districts.getDistrict(1).getGeometry().toText());
             Logger.log((String)("Deviation: " + districts.getDeviation(idealPop)));
         }
+        //If doing swaps (which we always are)
         if (SWAPS) {
+            //JL_last deviation is dummy variable to ensure population continues to decrease
             int lastDeviation = Integer.MAX_VALUE;
             Logger.log((String)"starting optimize loop");
+            //If the pop dev is still greater than 1, and also, is still progressing lower (lower than last deviation), go:
             while (districts.getFirstDistrictDev(idealPop) > 1 && districts.getFirstDistrictDev(idealPop) < lastDeviation) {
                 Logger.log((String)(String.valueOf(districts.getFirstDistrictDev(idealPop)) + "> 1 && " + "<" + lastDeviation));
+                //JL_ updates last pop dev
                 lastDeviation = districts.getFirstDistrictDev(idealPop);
                 Main.optimizePopulation(districts, idealPop);
                 if (!optimizeMax) break;
@@ -335,6 +344,7 @@ public class Main {
     private static ArrayList<Unit> getSwappabe(District from, District to) {
         ArrayList<Unit> result = new ArrayList<Unit>();
         for (Unit u : to.getMembers()) {
+            //If 
             if (!u.getGeometry().touches(from.getGeometry()) || u.getGeometry().union(from.getGeometry()).toText().contains("MULTIPOLYGON") || to.getGeometry().difference(u.getGeometry()).toText().contains("MULTIPOLYGON")) continue;
             result.add(u);
         }

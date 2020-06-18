@@ -111,6 +111,7 @@ public class DistrictList {
             ++i;
         }
         boolean madeChange = true;
+        //Repeat the process of adding skipped districts, as the districts grow
         while (madeChange && skippedUnits.size() > 0) {
             madeChange = false;
             ArrayList<Unit> removeUnit = new ArrayList<Unit>();

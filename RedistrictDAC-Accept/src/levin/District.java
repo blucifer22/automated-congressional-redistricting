@@ -61,6 +61,7 @@ public class District {
         return this.members;
     }
 
+    //JL_Rebuilds the geometry on every call
     public Geometry getGeometry() {
         if (this.geometry == null) {
             GeometryFactory factory = new GeometryFactory();
