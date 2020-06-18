@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import levin.Unit;
 
-
+//JL_Contains info on all the population units, i.e. census blocks, in the district
 public class District {
     protected ArrayList<Unit> members = new ArrayList();
     protected ArrayList<Unit> actualMembers = new ArrayList();
@@ -77,6 +77,7 @@ public class District {
         }
     }
 
+    //JL_not sure what skipped units are,??
     public ArrayList<Unit> getSkippedUnits() {
         return this.skippedUnits;
     }

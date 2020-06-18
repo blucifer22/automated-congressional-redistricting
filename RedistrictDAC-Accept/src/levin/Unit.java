@@ -3,6 +3,7 @@ package levin;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+//JL_the data structure for a population unit, i.e. a census block
 public class Unit {
     protected String id;
     protected int population;

@@ -102,6 +102,7 @@ public class DistrictList {
         return output;
     }
 
+    //JL_I guess it adds districts which are skipped by the Voronoi approach
     public void assignSkippedDistricts() {
         ArrayList<Unit> skippedUnits = new ArrayList();
         int i = 0;
@@ -115,6 +116,7 @@ public class DistrictList {
             ArrayList<Unit> removeUnit = new ArrayList<Unit>();
             block2 : for (Unit u : skippedUnits) {
                 int i2 = 0;
+                //If the skipped district touches the current district, then it adds it to the current district
                 while (i2 < this.districtList.length) {
                     if (this.districtList[i2].getGeometry().touches(u.getGeometry())) {
                         this.districtList[i2].add(u);

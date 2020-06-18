@@ -196,6 +196,7 @@ public class Main {
         double[][] arrd = defaultSearchPoints;
         int n = arrd.length;
         int n2 = 0;
+        //Iterates through search points
         while (n2 < n) {
             double[] searchPoint = arrd[n2];
             Logger.log((String)"Calling redistrict");
@@ -236,9 +237,12 @@ public class Main {
     //JL_Yikes will have to research kd trees
     private static DistrictList redistrict(District district, int idealPop, double[] searchPoint, boolean optimizeMax) {
         DistrictList districts = new DistrictList(2);
+        //Insert census blocks into kd tree
         KdTree<Unit> kd = Main.makeKdTree(district.getMembers());
+        //Max points returned is equal to kd tree size, i.e. # of census blocks
         int maxPointsReturned = kd.size();
         DistanceFunction d = null;
+        //distnance function is always square euclidean distance function
         if (SITE.equals("point")) {
             d = new SquareEuclideanDistanceFunction();
         } else if (SITE.equals("line")) {
@@ -251,12 +255,14 @@ public class Main {
         NearestNeighborIterator iterator = kd.getNearestNeighborIterator(searchPoint, maxPointsReturned, (DistanceFunction)d);
         Messenger.log((String)("\tsize=" + kd.size()));
         Messenger.log((String)("\tidealPop=" + idealPop));
+        //Iterate through all the nearest units until the first district in DistrictList has reached population
         while (iterator.hasNext()) {
             Unit u = (Unit)iterator.next();
             if (districts.getDistrict(0).getDistrictPopulation() <= idealPop) {
                 districts.getDistrict(0).add(u);
                 continue;
             }
+            //If first district has reached population, add everyting else to the 2nd district
             districts.getDistrict(1).add(u);
         }
         districts.assignSkippedDistricts();
