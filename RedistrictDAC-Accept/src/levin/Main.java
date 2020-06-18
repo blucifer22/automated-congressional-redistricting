@@ -316,6 +316,7 @@ public class Main {
     }
 
     private static void optimizePopulation(DistrictList districts, int idealPop) {
+        //JL_the "from" and "to" descriptions seem to be messed up, its more like the district is being swapped from "to" to "from"
         Logger.log((String)"starting optimize pop");
         Unit bestSwap = null;
         ArrayList<Unit> swappablesD1 = Main.getSwappabe(districts.getDistrict(1), districts.getDistrict(0));
@@ -323,11 +324,15 @@ public class Main {
         while (swappablesD1.size() > 0 && swappablesD2.size() > 0) {
             int currentDev;
             Logger.log((String)("sizes: " + swappablesD1.size() + " && " + swappablesD2.size()));
+            //JL_If the first district has too many people:
             if (districts.getDistrict(0).getDistrictPopulation() > idealPop) {
+                //JL_negative deviation.
                 currentDev = idealPop - districts.getDistrict(0).getDistrictPopulation();
                 Logger.log((String)("0 > ideal: currentDev = " + currentDev));
                 bestSwap = Main.getBestSwappable(swappablesD1, currentDev, districts.getDistrict(1), districts.getDistrict(0));
+                //JL_If the second district has too many people:
             } else if (districts.getDistrict(0).getDistrictPopulation() < idealPop) {
+                //JL_will return a negative deivaiton too.
                 currentDev = districts.getDistrict(0).getDistrictPopulation() - idealPop;
                 Logger.log((String)("1 > ideal: currentDev = " + currentDev));
                 bestSwap = Main.getBestSwappable(swappablesD2, currentDev, districts.getDistrict(0), districts.getDistrict(1));
@@ -342,20 +347,26 @@ public class Main {
     }
 
     private static ArrayList<Unit> getSwappabe(District from, District to) {
+        //JL_the "from" and "to" descriptions seem to be messed up, its more like the district is being swapped from "to" to "from"
         ArrayList<Unit> result = new ArrayList<Unit>();
         for (Unit u : to.getMembers()) {
-            //If 
+            //SKIP, if: the block from the "to" district does not touch the "from" district OR the union of this block with the "from" district would be noncontiguous OR taking this current block out of the "to" district would make it noncontiguous
             if (!u.getGeometry().touches(from.getGeometry()) || u.getGeometry().union(from.getGeometry()).toText().contains("MULTIPOLYGON") || to.getGeometry().difference(u.getGeometry()).toText().contains("MULTIPOLYGON")) continue;
+            //JL_otherwise, add it to our swappable districts.
             result.add(u);
         }
         return result;
     }
 
     private static Unit getBestSwappable(ArrayList<Unit> swappables, int currentDev, District from, District to) {
+        //JL_the "from" and "to" descriptions seem to be messed up, its more like the district is being swapped from "to" to "from"
         Unit bestUnit = null;
         int bestDeviation = currentDev;
         for (Unit u : swappables) {
+            //JL_Negative deviation plus a positive population should make it clsoer to 0
             int newDev = currentDev + u.getPopulation();
+            //SKIP, if: the new deviation is higher OR the union of this block with the "from" district would be noncontiguous OR taking this current block out of the "to" district would make it noncontigious
+            //JL_I guess they check the contiguity part AGAIN because the districts might've changed from some prior swaps
             if (Math.abs(newDev) >= Math.abs(bestDeviation) || u.getGeometry().union(from.getGeometry()).toText().contains("MULTIPOLYGON") || to.getGeometry().difference(u.getGeometry()).toText().contains("MULTIPOLYGON")) continue;
             bestUnit = u;
             bestDeviation = newDev;
