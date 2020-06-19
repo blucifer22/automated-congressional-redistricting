@@ -174,6 +174,8 @@ public class Main {
             double compScore = 1.0 - Main.getWorstCompactness(districts);
             double popScore = 100.0 * (Math.abs((double)districts.getDistrict(0).getDistrictPopulation() * 1.0 - (double)idealPop * 1.0) / (double)idealPop * 1.0);
             //If the population deviation (in %) is over 0.5%, penalize the score a ton (100,000) (which will make it impossible to get selected, basically)e
+            // MSC_We could probably reconfigure this to use the Pareto optimization criteria, though I'm not sure how
+            // much of a performance difference that would cause...
             if (popScore > 0.5) {
                 popScore += 100000.0;
             }
@@ -182,6 +184,12 @@ public class Main {
         return result;
     }
 
+    /**
+     * What it says on the tin. Determines which of the two districts has a worse compactness score, though it's
+     * not immediately clear which compactness measure they're utilizing...
+     * @param districts A List of Districts
+     * @return The worse of the two compactness scores
+     */
     private static double getWorstCompactness(DistrictList districts) {
         double districtArea = districts.getDistrict(0).getGeometry().getArea();
         double radius = Math.sqrt(districtArea / 3.141592653589793);

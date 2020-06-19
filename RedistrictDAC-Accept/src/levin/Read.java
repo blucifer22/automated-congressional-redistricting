@@ -51,7 +51,7 @@ public class Read {
     private static int EDITED_UNITS;
     /**
      * Don't return anything; only update the instance variables based on input parameters (filenames + a boolean)
-     * @param  Strings:{doc_root, dataFilePath, shapeFile, popFil}
+     * @param  String:{doc_root, dataFilePath, shapeFile, popFil}
      * @param  boolean: isBlock (if false, then is a census Tract)
      * @return      None
      * @see         None
@@ -78,7 +78,7 @@ public class Read {
      */
 
     public DistrictList getDistrictList(String stateId) {
-        //Creates the intiail statewide district,to be divided/conquered
+        //Creates the initial statewide district,to be divided/conquered
         DistrictList stateWideDistrictList = new DistrictList(1, stateId, DOC_ROOT);
         RAW_UNITS = this.read();
         Logger.log((String)"Finished reading now making state wide district");
@@ -106,11 +106,18 @@ public class Read {
         return allUnits;
     }
 
+    /**
+     * Read in the raw data from the Shapefiles and save it into the programmatically defined
+     * class of Unit.
+     * MSC_This is mostly boilerplate, not pertinent to the Python port
+     * @return An ArrayList of type Unit containing properly parsed Shapefile data
+     */
     public ArrayList<Unit> readRawData() {
         ArrayList<Unit> unitList = new ArrayList<Unit>();
         ArrayList<String> uniqueCounties = new ArrayList<String>();
         SummaryStatistics populationStat = new SummaryStatistics();
         try {
+            // Boilerplate to handle file manipulation
             File file = new File(SHAPE_FILE);
             HashMap<String, URL> connect = new HashMap<String, URL>();
             connect.put("url", file.toURL());
